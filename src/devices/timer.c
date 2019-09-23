@@ -7,6 +7,7 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "lib/kernel/list.h"
 
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -86,9 +87,19 @@ timer_elapsed(int64_t then)
    be turned on. */
 void timer_sleep(int64_t ticks)
 {
-  int64_t start = timer_ticks();
 
   ASSERT(intr_get_level() == INTR_ON);
+
+  int64_t start = timer_ticks();
+
+  struct thread *currentThread = thread_current();
+  currentThread->wake_time = ticks + start;
+  printf("current thread wake up time is: %d", currentThread->wake_time);
+
+  enum intr_level level = intr_disable(); //turn off the interrupt before the block
+  intr_set_level(level);
+  thread_block();
+
   while (timer_elapsed(start) < ticks)
     thread_yield();
 }
@@ -156,10 +167,26 @@ void timer_print_stats(void)
   printf("Timer: %" PRId64 " ticks\n", timer_ticks());
 }
 
+thread_action_func *checkWakeUp(struct thread *t, void *aux)
+{
+  // ASSERT(is_thread(t));
+  // ASSERT(t->status == THREAD_BLOCKED);
+  // list_push_back(&ready_list, &t->elem);
+  if (t->wake_time <= ticks)
+    thread_unblock(t);
+
+  // t->status = THREAD_READY;
+}
+
 /* Timer interrupt handler. */
 static void
 timer_interrupt(struct intr_frame *args UNUSED)
 {
+  enum intr_level level = intr_disable(); //turn off the interrupt
+
+  thread_foreach(checkWakeUp, NULL);
+  intr_set_level(level);
+
   ticks++;
   thread_tick();
 }

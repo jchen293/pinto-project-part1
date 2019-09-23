@@ -89,6 +89,7 @@ struct thread
   uint8_t *stack;            /* Saved stack pointer. */
   int priority;              /* Priority. */
   struct list_elem allelem;  /* List element for all threads list. */
+  int64_t wake_time;         /* the time when it should be woke up*/
 
   /* Shared between thread.c and synch.c. */
   struct list_elem elem; /* List element. */
@@ -100,16 +101,6 @@ struct thread
 
   /* Owned by thread.c. */
   unsigned magic; /* Detects stack overflow. */
-};
-
-/* List of sleep_list element. */
-struct sleep_list
-{
-  struct sleep_list *prev; /* Previous list element. */
-  struct sleep_list *next; /* Next list element. */
-  int64_t start_time;      /*the time threads started to sleep*/
-  int64_t wake_time;       /* the time when it should be woke up*/
-  int64_t sleep_time;      /* the time of the thread has been blocked */
 };
 
 /* If false (default), use round-robin scheduler.
