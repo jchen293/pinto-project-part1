@@ -119,8 +119,9 @@ void thread_start(void)
    Thus, this function runs in an external interrupt context. */
 void thread_tick(void)
 {
-  struct thread *t = thread_current();
   printf("thread_tick function is called!");
+
+  struct thread *t = thread_current();
   /* Update statistics. */
   if (t == idle_thread)
     idle_ticks++;

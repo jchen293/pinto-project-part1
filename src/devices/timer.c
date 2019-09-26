@@ -87,6 +87,8 @@ timer_elapsed(int64_t then)
    be turned on. */
 void timer_sleep(int64_t ticks)
 {
+  printf("current thread wake up time is: %d  \n", currentThread->wake_time);
+
   timer_interrupt(NULL);
   enum intr_level level = intr_enable(); //turn off the interrupt before the block
   intr_set_level(level);
@@ -97,7 +99,6 @@ void timer_sleep(int64_t ticks)
 
   struct thread *currentThread = thread_current();
   currentThread->wake_time = ticks + start;
-  printf("current thread wake up time is: %d  \n", currentThread->wake_time);
 
   enum intr_level level = intr_disable(); //turn off the interrupt before the block
   intr_set_level(level);
