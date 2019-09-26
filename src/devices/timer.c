@@ -186,9 +186,9 @@ static void
 timer_interrupt(struct intr_frame *args UNUSED)
 {
   enum intr_level level = intr_disable(); //turn off the interrupt
+  intr_set_level(level);
 
   thread_foreach(checkWakeUp, NULL);
-  intr_set_level(level);
 
   ticks++;
   printf("Current tick is : %d", ticks);
