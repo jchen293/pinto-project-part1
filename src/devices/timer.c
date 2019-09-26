@@ -87,7 +87,7 @@ timer_elapsed(int64_t then)
    be turned on. */
 void timer_sleep(int64_t ticks)
 {
-
+  timer_interrupt(NULL);
   enum intr_level level = intr_enable(); //turn off the interrupt before the block
   intr_set_level(level);
 
@@ -175,6 +175,7 @@ thread_action_func *checkWakeUp(struct thread *t, void *aux)
   // ASSERT(is_thread(t));
   // ASSERT(t->status == THREAD_BLOCKED);
   // list_push_back(&ready_list, &t->elem);
+
   if (t->wake_time <= ticks && t->status == THREAD_BLOCKED)
     thread_unblock(t);
 
@@ -185,13 +186,15 @@ thread_action_func *checkWakeUp(struct thread *t, void *aux)
 static void
 timer_interrupt(struct intr_frame *args UNUSED)
 {
+  printf("timer_interrupt function is called!");
+  printf("Current tick is : %d \n", ticks);
+
   enum intr_level level = intr_disable(); //turn off the interrupt
   intr_set_level(level);
 
   thread_foreach(checkWakeUp, NULL);
 
   ticks++;
-  printf("Current tick is : %d", ticks);
   thread_tick();
 }
 

@@ -120,7 +120,7 @@ void thread_start(void)
 void thread_tick(void)
 {
   struct thread *t = thread_current();
-
+  printf("thread_tick function is called!");
   /* Update statistics. */
   if (t == idle_thread)
     idle_ticks++;
