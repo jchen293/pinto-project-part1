@@ -18,9 +18,6 @@
 #error TIMER_FREQ <= 1000 recommended
 #endif
 
-/*list of all sleeping threads.*/
-static struct list sleep_list;
-
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
 
@@ -40,9 +37,6 @@ void timer_init(void)
 {
   pit_configure_channel(0, 2, TIMER_FREQ);
   intr_register_ext(0x20, timer_interrupt, "8254 Timer");
-
-  /*initial the sleep_list*/
-  list_init(&sleep_list);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -88,36 +82,23 @@ timer_elapsed(int64_t then)
 {
   return timer_ticks() - then;
 }
-/**/
-list_less_func *sort_by_wake(struct list *list, struct list_elem *elem,
-                             list_less_func *less, void *aux)
-{
-}
+
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void timer_sleep(int64_t ticks)
 {
+  printf("current thread wake up time is: %d  \n", currentThread->wake_time);
 
-  /*first check base case that ticks cannot be negative*/
-  ASSERT(ticks >= 0);
+  timer_interrupt(NULL);
+  enum intr_level level = intr_enable(); //turn off the interrupt before the block
+  intr_set_level(level);
 
-  // timer_interrupt(NULL);
-  // enum intr_level level = intr_enable();
-  // intr_set_level(level);
-
-  // ASSERT(intr_get_level() == INTR_ON);
+  ASSERT(intr_get_level() == INTR_ON);
 
   int64_t start = timer_ticks();
+
   struct thread *currentThread = thread_current();
-  printf("current thread wake up time is: %d  \n", currentThread->wake_time);
   currentThread->wake_time = ticks + start;
-
-  // /*then we insert the function to the sleep_list*/
-  // struct list *sleep_li = &sleep_list;
-
-  // struct elem *new_elem = (struct elem *)malloc(sizeof(struct elem *)); /*create new elem node*/
-
-  // list_insert_ordered(sleep_li, new_elem, );
 
   enum intr_level level = intr_disable(); //turn off the interrupt before the block
   intr_set_level(level);
