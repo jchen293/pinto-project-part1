@@ -60,6 +60,7 @@ is_tail(struct list_elem *elem)
 void list_init(struct list *list)
 {
   ASSERT(list != NULL);
+  printf("list is not null when called list_init");
   list->head.prev = NULL;
   list->head.next = &list->tail;
   list->tail.prev = &list->head;
