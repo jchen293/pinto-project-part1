@@ -170,7 +170,7 @@ void timer_print_stats(void)
   printf("Timer: %" PRId64 " ticks\n", timer_ticks());
 }
 
-thread_action_func *checkWakeUp(struct thread *t, void *aux)
+thread_action_func *checkWakeUp(struct thread *t)
 {
   // ASSERT(is_thread(t));
   // ASSERT(t->status == THREAD_BLOCKED);
@@ -181,7 +181,7 @@ thread_action_func *checkWakeUp(struct thread *t, void *aux)
   // t->status = THREAD_READY;
 }
 
-/* Timer interrupt handler. */
+/* Timer interrupt handler. invoked every 1 ticks, used to wake up one thread a time from sleep list*/
 static void
 timer_interrupt(struct intr_frame *args UNUSED)
 {
@@ -191,7 +191,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
   enum intr_level level = intr_disable(); //turn off the interrupt
   intr_set_level(level);
 
-  thread_foreach(checkWakeUp, NULL);
+  thread_foreach(checkWakeUp, NULL); //
 
   ticks++;
   printf("Current tick is : %d", ticks);
