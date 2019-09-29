@@ -105,8 +105,10 @@ void timer_sleep(int64_t ticks)
   currentThread->wake_time = ticks + start;
 
   /*test add a node in sleep_list*/
-  struct elem *elem = malloc(sizeof(elem));
-  ASSERT(elem == NULL);
+  struct list_elem *new_elem = malloc(sizeof(new_elem));
+   new_elem->num = 1;
+  ASSERT(new_elem != NULL);
+   printf("new_elem's number: %d",new_elem->num);
 
   // ASSERT (intr_get_level () == INTR_ON);
   // while (timer_elapsed (start) < ticks)
