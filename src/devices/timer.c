@@ -215,6 +215,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
       /*check the wake time of threads in the front*/
       struct list_elem *pop_elem = list_pop_front(&sleep_list);
       free(pop_elem);
+      printf("pop succeed?");
     }
   }
 }
