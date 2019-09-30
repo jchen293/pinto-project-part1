@@ -43,6 +43,7 @@ void timer_init(void)
 
   /*initial the sleep_list*/
   list_init(&sleep_list);
+  list_init(&sema);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -208,18 +209,18 @@ timer_interrupt(struct intr_frame *args UNUSED)
   thread_tick();
   printf("test loop in timer interrupt");
 
-  // /*check unblock threads*/
-  // int64_t now = timer_ticks();
-  // if (list_size(&sleep_list) != 0)
-  // {
-  //   if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
-  //   {
-  //     /*check the wake time of threads in the front*/
-  //     struct list_elem *pop_elem = list_pop_front(&sleep_list);
-  //     free(pop_elem);
-  //     printf("pop succeed?");
-  //   }
-  // }
+  /*check unblock threads*/
+  int64_t now = timer_ticks();
+  if (list_size(&sleep_list) != 0)
+  {
+    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
+    {
+      /*check the wake time of threads in the front*/
+      struct list_elem *pop_elem = list_pop_front(&sleep_list);
+      free(pop_elem);
+      printf("pop succeed?");
+    }
+  }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
