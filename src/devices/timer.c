@@ -110,7 +110,7 @@ void timer_sleep(int64_t ticks)
   // printf("current thread wake up time is: %d  \n", currentThread->wake_time); it works
   currentThread->wake_time = ticks + start;
 
-  // sema_down(&sema);
+  sema_down(&sema);
 
   /*add an elem of thread to sleep_list*/
   struct list_elem *new_elem = malloc(sizeof(new_elem));
@@ -127,7 +127,7 @@ void timer_sleep(int64_t ticks)
     list_insert_ordered(&sleep_list, new_elem, sort_by_wake, NULL);
     printf("list size: %d", list_size(&sleep_list));
   }
-  // sema_up(&sema);
+  sema_up(&sema);
   thread_block();
 
   // ASSERT(intr_get_level() == INTR_ON);
