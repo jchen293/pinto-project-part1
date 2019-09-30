@@ -101,7 +101,7 @@ bool *sort_by_wake(struct list_elem *elem,
 void timer_sleep(int64_t ticks)
 {
 
-  enum intr_level old_level = intr_disable();
+  // enum intr_level old_level = intr_disable();
 
   ASSERT(ticks >= 0);
 
@@ -130,8 +130,9 @@ void timer_sleep(int64_t ticks)
   // sema_up(&sema);
   thread_block();
 
-  ASSERT(intr_get_level() == INTR_ON);
-  intr_set_level(old_level);
+  // ASSERT(intr_get_level() == INTR_ON);
+  // intr_set_level(old_level);
+
   // while (timer_elapsed (start) < ticks)
   //   thread_yield ();
 }
@@ -205,6 +206,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick();
+  printf("test loop in timer interrupt");
 
   // /*check unblock threads*/
   // int64_t now = timer_ticks();
