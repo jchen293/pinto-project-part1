@@ -103,13 +103,24 @@ void timer_sleep(int64_t ticks)
 
   int64_t start = timer_ticks();
   struct thread *currentThread = thread_current();
-  printf("current thread wake up time is: %d  \n", currentThread->wake_time);
+  // printf("current thread wake up time is: %d  \n", currentThread->wake_time); it works
   currentThread->wake_time = ticks + start;
 
   /*add an elem of thread to sleep_list*/
   struct list_elem *new_elem = malloc(sizeof(new_elem));
   new_elem->sleep_thread = currentThread;
-  printf("the size of list: %d", list_size(&sleep_list));
+  // printf("the size of list: %d", list_size(&sleep_list)); it works
+  if (list_size(&sleep_list) == 0)
+  {
+    list_push_back(&sleep_list, new_elem);
+    printf("list size after push FIRST elem: %d", list_size(&sleep_list));
+  }
+  else
+  {
+    /* list is not empty */
+    list_insert_ordered(&sleep_list, new_elem, sort_by_wake, NULL);
+    printf("list size: %d", list_size(&sleep_list));
+  }
 
   // ASSERT (intr_get_level () == INTR_ON);
   // while (timer_elapsed (start) < ticks)
