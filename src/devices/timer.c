@@ -87,10 +87,12 @@ timer_elapsed(int64_t then)
 {
   return timer_ticks() - then;
 }
-/**/
-list_less_func *sort_by_wake(struct list *list, struct list_elem *elem,
-                             list_less_func *less, void *aux)
+
+/*return bool*/
+bool *sort_by_wake(struct list_elem *elem,
+                   struct list_elem *e, void *aux)
 {
+  return elem->sleep_thread->wake_time < e->sleep_thread->wake_time;
 }
 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
@@ -104,11 +106,10 @@ void timer_sleep(int64_t ticks)
   printf("current thread wake up time is: %d  \n", currentThread->wake_time);
   currentThread->wake_time = ticks + start;
 
-  /*test add a node in sleep_list*/
+  /*add an elem of thread to sleep_list*/
   struct list_elem *new_elem = malloc(sizeof(new_elem));
-   new_elem->num = 1;
-  ASSERT(new_elem != NULL);
-   printf("new_elem's number: %d",new_elem->num);
+  new_elem->sleep_thread = currentThread;
+  printf("the size of list: %d", list_size(&sleep_list));
 
   // ASSERT (intr_get_level () == INTR_ON);
   // while (timer_elapsed (start) < ticks)

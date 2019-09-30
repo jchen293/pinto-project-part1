@@ -91,7 +91,7 @@ struct list_elem
 {
   struct list_elem *prev; /* Previous list element. */
   struct list_elem *next; /* Next list element. */
-  int num;                /*testing list*/
+  struct thread *sleep_thread;
 };
 
 /* List. */
