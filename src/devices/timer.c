@@ -110,6 +110,8 @@ void timer_sleep(int64_t ticks)
   struct thread *currentThread = thread_current();
   // printf("current thread wake up time is: %d  \n", currentThread->wake_time); it works
   currentThread->wake_time = ticks + start;
+  printf("current ticks: %d  \n", start);
+  printf("wake up time: %d  \n", currentThread->wake_time);
 
   // sema_down(&sema);
 
