@@ -210,17 +210,17 @@ timer_interrupt(struct intr_frame *args UNUSED)
   ticks++;
   thread_tick();
 
-  // /*check unblock threads*/
-  // int64_t now = timer_ticks();
-  // if (list_size(&sleep_list) != 0)
-  // {
-  //   if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
-  //   {
-  //     /*check the wake time of threads in the front*/
-  //     struct list_elem *pop_elem = list_pop_front(&sleep_list);
-  //     free(pop_elem);
-  //   }
-  // }
+  /*check unblock threads*/
+  int64_t now = timer_ticks();
+  if (list_size(&sleep_list) != 0)
+  {
+    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
+    {
+      /*check the wake time of threads in the front*/
+      struct list_elem *pop_elem = list_pop_front(&sleep_list);
+      free(pop_elem);
+    }
+  }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
