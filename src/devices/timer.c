@@ -19,7 +19,7 @@
 
 /*list of all sleeping threads.*/
 static struct list sleep_list;
-static struct semaphore sema;
+// static struct semaphore sema;
 
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
@@ -105,7 +105,7 @@ void timer_sleep(int64_t ticks)
   ASSERT(intr_get_level() == INTR_ON);
   enum intr_level old_level = intr_disable();
 
-  ASSERT(ticks >= 0);
+  ASSERT(ticks > 0);
 
   int64_t start = timer_ticks();
   struct thread *currentThread = thread_current();
@@ -130,26 +130,13 @@ void timer_sleep(int64_t ticks)
     printf("list size: %d", list_size(&sleep_list));
   }
   thread_block();
-
+  printf("I don't understand why this line of code cannot be reached\n");
   /*test list elems*/
   struct list_elem *e;
   for (e = list_begin(&sleep_list); e != list_end(&sleep_list);
        e = list_next(e))
   {
     printf("list elem: %d \n", e->sleep_thread->wake_time);
-  }
-
-  /*now we check block in wait list*/
-  /*check unblock threads*/
-  int64_t now = timer_ticks();
-  if (list_size(&sleep_list) != 0)
-  {
-    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
-    {
-      /*check the wake time of threads in the front*/
-      struct list_elem *pop_elem = list_pop_front(&sleep_list);
-      free(pop_elem);
-    }
   }
 
   intr_set_level(old_level);
@@ -228,17 +215,19 @@ timer_interrupt(struct intr_frame *args UNUSED)
   ticks++;
   thread_tick();
 
-  // /*check unblock threads*/
-  // int64_t now = timer_ticks();
-  // if (list_size(&sleep_list) != 0)
-  // {
-  //   if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
-  //   {
-  //     /*check the wake time of threads in the front*/
-  //     struct list_elem *pop_elem = list_pop_front(&sleep_list);
-  //     free(pop_elem);
-  //   }
-  // }
+  /*now we check block in wait list*/
+  /*check unblock threads*/
+  int64_t now = timer_ticks();
+  if (list_size(&sleep_list) != 0)
+  {
+    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
+    {
+      /*check the wake time of threads in the front*/
+      struct list_elem *pop_elem = list_pop_front(&sleep_list);
+      thread_unblock(pop_elem->sleep_thread);
+      free(pop_elem);
+    }
+  }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
