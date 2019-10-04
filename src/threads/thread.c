@@ -217,6 +217,13 @@ void thread_block(void)
   schedule();
 }
 
+/*push by priority*/
+bool *push_by_priority(struct list_elem *elem,
+                       struct list_elem *e, void *aux)
+{
+  return elem->sleep_thread->priority > e->sleep_thread->priority;
+}
+
 /* Transitions a blocked thread T to the ready-to-run state.
    This is an error if T is not blocked.  (Use thread_yield() to
    make the running thread ready.)
@@ -233,7 +240,14 @@ void thread_unblock(struct thread *t)
 
   old_level = intr_disable();
   ASSERT(t->status == THREAD_BLOCKED);
-  list_push_back(&ready_list, &t->elem); //to implement priority, invoke insert_order function in list.c
+
+  /*to implement priority, invoke insert_order function in list.c
+  instead of calling list_push_back
+  */
+  list_insert_ordered(&ready_list, &t->elem, push_by_priority, NULL);
+
+  // list_push_back(&ready_list, &t->elem);
+
   t->status = THREAD_READY;
   intr_set_level(old_level);
 }
