@@ -131,19 +131,19 @@ void timer_sleep(int64_t ticks)
     printf("list size: %d    thread id: %d\n", list_size(&sleep_list), new_elem->sleep_thread->tid);
   }
 
+  /*test list elems*/
+  struct list_elem *e;
+  for (e = list_begin(&sleep_list); e != list_end(&sleep_list);
+       e = list_next(e))
+  {
+    printf("list elem thread id: %d \n", e->sleep_thread->tid);
+  }
+
   // printf("GOT HERE RIGHT?\n");
   thread_block();
   // printf("I don't understand why this line of code cannot be reached\n");
 
   intr_set_level(old_level);
-
-  // /*test list elems*/
-  // struct list_elem *e;
-  // for (e = list_begin(&sleep_list); e != list_end(&sleep_list);
-  //      e = list_next(e))
-  // {
-  //   printf("list elem: %d \n", e->sleep_thread->wake_time);
-  // }
 
   // while (timer_elapsed (start) < ticks)
   //   thread_yield ();
