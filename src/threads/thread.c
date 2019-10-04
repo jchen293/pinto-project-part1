@@ -196,6 +196,9 @@ tid_t thread_create(const char *name, int priority,
   /* Add to run queue. */
   thread_unblock(t);
 
+  //if new threads's priority is larger than current running one , yield
+  if (t->priority > thread_current()->priority)
+    thread_yield();
   return tid;
 }
 
@@ -230,7 +233,7 @@ void thread_unblock(struct thread *t)
 
   old_level = intr_disable();
   ASSERT(t->status == THREAD_BLOCKED);
-  list_push_back(&ready_list, &t->elem);
+  list_push_back(&ready_list, &t->elem); //to implement priority, invoke insert_order function in list.c
   t->status = THREAD_READY;
   intr_set_level(old_level);
 }
@@ -324,6 +327,7 @@ void thread_foreach(thread_action_func *func, void *aux)
 void thread_set_priority(int new_priority)
 {
   thread_current()->priority = new_priority;
+  thread_yield(); //
 }
 
 /* Returns the current thread's priority. */
