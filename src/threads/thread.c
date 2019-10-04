@@ -196,6 +196,9 @@ tid_t thread_create(const char *name, int priority,
   /*initalize elem in thread*/
   struct list_elem *elem = &t->elem;
   elem->sleep_thread = &t;
+  printf("priority before: %d", elem->sleep_thread->priority);
+  elem->sleep_thread->priority = t->priority;
+  printf("priority after: %d", elem->sleep_thread->priority);
 
   /* Add to run queue. */
   thread_unblock(t);
@@ -250,8 +253,9 @@ void thread_unblock(struct thread *t)
   /*to implement priority, invoke insert_order function in list.c
   instead of calling list_push_back
   */
-  struct list_elem *elem = &t->elem;
-  printf("1111111111, priority of unblocked thread: %d\n", elem->sleep_thread->priority);
+  // struct list_elem *elem = &t->elem;
+  // printf("1111111111, priority of unblocked thread: %d\n", t->priority);
+
   list_insert_ordered(&ready_list, &t->elem, push_by_priority, NULL);
 
   // list_push_back(&ready_list, &t->elem);
