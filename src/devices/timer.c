@@ -229,9 +229,9 @@ timer_interrupt(struct intr_frame *args UNUSED)
     if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
     {
       /*check the wake time of threads in the front*/
+      printf("poped one threads at ticks: %d    unblocked threads: %d\n", now, list_begin(&sleep_list)->sleep_thread->tid);
       struct list_elem *pop_elem = list_pop_front(&sleep_list);
       thread_unblock(pop_elem->sleep_thread);
-      printf("poped one threads at ticks: %d    unblocked threads: %d\n", now, pop_elem->sleep_thread->tid);
       // free(pop_elem);
     }
   }
