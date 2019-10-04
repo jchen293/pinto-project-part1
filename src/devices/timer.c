@@ -130,8 +130,28 @@ void timer_sleep(int64_t ticks)
     printf("list size: %d", list_size(&sleep_list));
   }
 
+  /*now we check block in wait list*/
+  /*check unblock threads*/
+  printf("11111111\n");
+  int64_t now = timer_ticks();
+  printf("22222222\n");
+  if (list_size(&sleep_list) != 0)
+  {
+    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
+    {
+      /*check the wake time of threads in the front*/
+      struct list_elem *pop_elem = list_pop_front(&sleep_list);
+      thread_unblock(pop_elem->sleep_thread);
+      free(pop_elem);
+    }
+  }
+
+  printf("GOT HERE RIGHT?\n");
   thread_block();
   printf("I don't understand why this line of code cannot be reached\n");
+
+  intr_set_level(old_level);
+
   /*test list elems*/
   struct list_elem *e;
   for (e = list_begin(&sleep_list); e != list_end(&sleep_list);
@@ -139,8 +159,6 @@ void timer_sleep(int64_t ticks)
   {
     printf("list elem: %d \n", e->sleep_thread->wake_time);
   }
-
-  intr_set_level(old_level);
 
   // while (timer_elapsed (start) < ticks)
   //   thread_yield ();
@@ -215,22 +233,6 @@ timer_interrupt(struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick();
-
-  /*now we check block in wait list*/
-  /*check unblock threads*/
-  printf("11111111");
-  int64_t now = timer_ticks();
-  printf("22222222");
-  if (list_size(&sleep_list) != 0)
-  {
-    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
-    {
-      /*check the wake time of threads in the front*/
-      struct list_elem *pop_elem = list_pop_front(&sleep_list);
-      thread_unblock(pop_elem->sleep_thread);
-      free(pop_elem);
-    }
-  }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
