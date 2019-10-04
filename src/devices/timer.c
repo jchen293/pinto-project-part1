@@ -226,7 +226,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
   // printf("22222222\n");
   if (list_size(&sleep_list) != 0)
   {
-    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now)
+    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now && list_begin(&sleep_list)->sleep_thread->status == THREAD_BLOCKED)
     {
       /*check the wake time of threads in the front*/
       printf("poped one threads at ticks: %d    unblocked threads: %d\n", now, list_begin(&sleep_list)->sleep_thread->tid);
