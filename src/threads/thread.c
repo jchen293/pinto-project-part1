@@ -193,12 +193,12 @@ tid_t thread_create(const char *name, int priority,
   sf->eip = switch_entry;
   sf->ebp = 0;
 
-  /*initalize elem in thread*/
-  struct list_elem *elem = &t->elem;
-  elem->sleep_thread = &t;
-  printf("priority before: %d", elem->sleep_thread->priority);
-  elem->sleep_thread->priority = t->priority;
-  printf("priority after: %d", elem->sleep_thread->priority);
+  // /*initalize elem in thread*/
+  // struct list_elem *elem = &t->elem;
+  // elem->sleep_thread = &t;
+  // printf("priority before: %d", elem->sleep_thread->priority);
+  // elem->sleep_thread->priority = t->priority;
+  // printf("priority after: %d", elem->sleep_thread->priority);
 
   /* Add to run queue. */
   thread_unblock(t);
@@ -225,12 +225,16 @@ void thread_block(void)
   schedule();
 }
 
-/*push by priority*/
+/*push by priority; elem is the one been inserted*/
 bool *push_by_priority(struct list_elem *elem,
                        struct list_elem *e, void *aux)
 {
-  printf("two threads' priority: %d    %d\n", elem->sleep_thread->priority, e->sleep_thread->priority);
-  return elem->sleep_thread->priority > e->sleep_thread->priority;
+
+  /*first get the thread of e*/
+  struct thread *t = list_entry(e, struct thread, allelem); //allelem or elem?
+  printf("IN PUSH_BY_PRIORITY, threads priority: %d    , %d \n", elem->sleep_thread->priority, t->priority);
+
+  return elem->sleep_thread->priority > t->priority;
 }
 
 /* Transitions a blocked thread T to the ready-to-run state.
@@ -344,7 +348,7 @@ void thread_foreach(thread_action_func *func, void *aux)
   for (e = list_begin(&all_list); e != list_end(&all_list);
        e = list_next(e))
   {
-    struct thread *t = list_entry(e, struct thread, allelem);
+    struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
     func(t, aux);
   }
 }
