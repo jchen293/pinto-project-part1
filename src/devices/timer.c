@@ -225,15 +225,14 @@ timer_interrupt(struct intr_frame *args UNUSED)
   int64_t now = timer_ticks();
   if (list_size(&sleep_list) != 0)
   {
-    if (list_begin(&sleep_list)->sleep_thread->wake_time <= now && list_begin(&sleep_list)->sleep_thread->status == THREAD_BLOCKED)
+    if (list_entry(list_front(&sleep_list), struct thread, elem)->wake_time <= now && list_entry(list_front(&sleep_list), struct thread, elem)->status == THREAD_BLOCKED)
     {
       /*check the wake time of threads in the front*/
-      printf("wake time of list_begin: %d \n", list_begin(&sleep_list)->sleep_thread->wake_time);
+      printf("wake time of list_begin: %d \n", list_entry(list_front(&sleep_list), struct thread, elem)->wake_time);
+      struct thread *t_elem = list_entry(list_front(&sleep_list), struct thread, elem);
       struct list_elem *pop_elem = list_pop_front(&sleep_list);
-      struct thread *t_elem = list_entry(pop_elem, struct thread, elem);
       printf("unblocked threads: %d \n", t_elem->tid);
       thread_unblock(t_elem);
-      // free(pop_elem);
     }
   }
 }
