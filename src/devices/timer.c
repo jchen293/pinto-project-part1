@@ -136,7 +136,8 @@ void timer_sleep(int64_t ticks)
   for (e = list_begin(&sleep_list); e != list_end(&sleep_list);
        e = list_next(e))
   {
-    printf("list elem thread id: %d \n", e->sleep_thread->tid);
+    struct thread *t_elem = list_entry(e, struct thread, elem);
+    printf("list elem thread id: %d \n", t_elem->tid);
   }
 
   // printf("GOT HERE RIGHT?\n");
@@ -227,9 +228,10 @@ timer_interrupt(struct intr_frame *args UNUSED)
     if (list_begin(&sleep_list)->sleep_thread->wake_time <= now && list_begin(&sleep_list)->sleep_thread->status == THREAD_BLOCKED)
     {
       /*check the wake time of threads in the front*/
-      printf("poped one threads at ticks: %d    unblocked threads: %d\n", now, list_begin(&sleep_list)->sleep_thread->tid);
+      printf();
       struct list_elem *pop_elem = list_pop_front(&sleep_list);
       struct thread *t_elem = list_entry(pop_elem, struct thread, elem);
+      printf("poped one threads at ticks: %d    unblocked threads: %d\n", now, t_elem->tid);
       thread_unblock(t_elem);
       // free(pop_elem);
     }
