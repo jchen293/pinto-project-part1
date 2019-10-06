@@ -94,7 +94,12 @@ timer_elapsed(int64_t then)
 bool *sort_by_wake(struct list_elem *elem,
                    struct list_elem *e, void *aux)
 {
-  return elem->sleep_thread->wake_time < e->sleep_thread->wake_time;
+
+  /*first get the thread of e*/
+  struct thread *t_elem = list_entry(elem, struct thread, elem);
+  struct thread *t_e = list_entry(e, struct thread, elem);
+
+  return t_elem->wake_time < t_e->wake_time;
 }
 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
@@ -109,26 +114,22 @@ void timer_sleep(int64_t ticks)
 
   int64_t start = timer_ticks();
   struct thread *currentThread = thread_current();
-  // printf("current thread wake up time is: %d  \n", currentThread->wake_time); it works
   currentThread->wake_time = ticks + start;
   printf("current ticks: %d  \n", start);
   printf("wake up time: %d  \n", currentThread->wake_time);
 
   /*add an elem of thread to sleep_list*/
-  // struct list_elem *new_elem = malloc(sizeof(new_elem));
   struct list_elem *new_elem = &currentThread->elem;
-  new_elem->sleep_thread = currentThread;
-  // printf("the size of list: %d", list_size(&sleep_list)); it works
   if (list_size(&sleep_list) == 0)
   {
     list_push_back(&sleep_list, new_elem);
-    printf("list size after push FIRST elem: %d   thread id: %d \n", list_size(&sleep_list), new_elem->sleep_thread->tid);
+    printf("list size after push FIRST elem: %d   thread id: %d \n", list_size(&sleep_list), list_entry(new_elem, struct thread, elem)->tid);
   }
   else
   {
     /* list is not empty */
     list_insert_ordered(&sleep_list, new_elem, sort_by_wake, NULL);
-    printf("list size: %d    thread id: %d\n", list_size(&sleep_list), new_elem->sleep_thread->tid);
+    printf("list size: %d    thread id: %d\n", list_size(&sleep_list), list_entry(new_elem, struct thread, elem)->tid);
   }
 
   /*test list elems*/
