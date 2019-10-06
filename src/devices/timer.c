@@ -115,21 +115,21 @@ void timer_sleep(int64_t ticks)
   int64_t start = timer_ticks();
   struct thread *currentThread = thread_current();
   currentThread->wake_time = ticks + start;
-  printf("current ticks: %d  \n", start);
-  printf("wake up time: %d  \n", currentThread->wake_time);
+  // printf("current ticks: %d  \n", start);
+  printf("thread id: %d   wake up time: %d  \n", currentThread->tid, currentThread->wake_time);
 
   /*add an elem of thread to sleep_list*/
   struct list_elem *new_elem = &currentThread->elem;
   if (list_size(&sleep_list) == 0)
   {
     list_push_back(&sleep_list, new_elem);
-    printf("list size after push FIRST elem: %d   thread id: %d \n", list_size(&sleep_list), list_entry(new_elem, struct thread, elem)->tid);
+    // printf("list size after push FIRST elem: %d   thread id: %d \n", list_size(&sleep_list), list_entry(new_elem, struct thread, elem)->tid);
   }
   else
   {
     /* list is not empty */
     list_insert_ordered(&sleep_list, new_elem, sort_by_wake, NULL);
-    printf("list size: %d    thread id: %d\n", list_size(&sleep_list), list_entry(new_elem, struct thread, elem)->tid);
+    // printf("list size: %d    thread id: %d\n", list_size(&sleep_list), list_entry(new_elem, struct thread, elem)->tid);
   }
 
   /*test list elems*/
@@ -138,7 +138,7 @@ void timer_sleep(int64_t ticks)
        e = list_next(e))
   {
     struct thread *t_elem = list_entry(e, struct thread, elem);
-    printf("list elem thread id: %d \n", t_elem->tid);
+    printf("list elem thread id: %d wake time: %d\n", t_elem->tid, t_elem->wake_time);
   }
 
   // printf("GOT HERE RIGHT?\n");
