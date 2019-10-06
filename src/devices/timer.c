@@ -228,12 +228,19 @@ timer_interrupt(struct intr_frame *args UNUSED)
   {
     if (list_entry(list_front(&sleep_list), struct thread, elem)->wake_time <= now && list_entry(list_front(&sleep_list), struct thread, elem)->status == THREAD_BLOCKED)
     {
-      /*check the wake time of threads in the front*/
-      printf("wake time of list_begin: %d \n", list_entry(list_front(&sleep_list), struct thread, elem)->wake_time);
-      struct thread *t_elem = list_entry(list_front(&sleep_list), struct thread, elem);
-      struct list_elem *pop_elem = list_pop_front(&sleep_list);
-      printf("unblocked threads: %d \n", t_elem->tid);
-      thread_unblock(t_elem);
+
+      /*while loop to wake up threads at the same wake time*/
+      int64_t wake_time = list_entry(list_front(&sleep_list), struct thread, elem)->wake_time;
+      printf("while loop wake time: %d \n", wake_time);
+      while (list_entry(list_front(&sleep_list), struct thread, elem)->wake_time = wake_time)
+      {
+        /*check the wake time of threads in the front*/
+        printf("wake time of list_begin: %d \n", list_entry(list_front(&sleep_list), struct thread, elem)->wake_time);
+        struct thread *t_elem = list_entry(list_front(&sleep_list), struct thread, elem);
+        struct list_elem *pop_elem = list_pop_front(&sleep_list);
+        printf("unblocked threads: %d \n", t_elem->tid);
+        thread_unblock(t_elem);
+      }
     }
   }
 }
