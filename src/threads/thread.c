@@ -333,6 +333,7 @@ void thread_yield(void)
 
   old_level = intr_disable();
   if (cur != idle_thread)
+    /*need to implement push to ready_list by priority*/
     list_push_back(&ready_list, &cur->elem);
   cur->status = THREAD_READY;
   schedule();
@@ -359,10 +360,12 @@ void thread_foreach(thread_action_func *func, void *aux)
 void thread_set_priority(int new_priority)
 {
   thread_current()->priority = new_priority;
-  // thread_yield();
+  /*if the current thread no longer has the highest priority, yield,how to implement this?*/
+  //thread_yield();
 }
 
-/* Returns the current thread's priority. */
+/* Returns the current thread's priority.
+ In the presence of priority donation, returns the higher (donated) priority*/
 int thread_get_priority(void)
 {
   return thread_current()->priority;
