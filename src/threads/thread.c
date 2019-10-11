@@ -205,8 +205,11 @@ tid_t thread_create(const char *name, int priority,
 
   /*if new threads's priority is larger than current running one , yield*/
 
-  // if (t->priority > thread_current()->priority)
-  //   thread_yield();
+  if (t->tid != 2 && t->priority > thread_current()->priority)
+  {
+
+    thread_yield();
+  }
   return tid;
 }
 
@@ -334,7 +337,8 @@ void thread_yield(void)
   old_level = intr_disable();
   if (cur != idle_thread)
     /*need to implement push to ready_list by priority*/
-    list_push_back(&ready_list, &cur->elem);
+    // list_push_back(&ready_list, &cur->elem);
+    list_insert_ordered(&ready_list, &cur->elem, push_by_priority, NULL);
   cur->status = THREAD_READY;
   schedule();
   intr_set_level(old_level);
@@ -360,8 +364,12 @@ void thread_foreach(thread_action_func *func, void *aux)
 void thread_set_priority(int new_priority)
 {
   thread_current()->priority = new_priority;
-  /*if the current thread no longer has the highest priority, yield,how to implement this?*/
-  //thread_yield();
+  /*if the current thread no longer has the highest priority, yield,how to implement this?
+  answer: because ready list is sorted by priority, check the first elem;*/
+  if (running_thread()->status == THREAD_RUNNING && !list_empty(&ready_list) && new_priority < list_entry(list_front(&ready_list), struct thread, elem)->priority)
+  {
+    thread_yield();
+  }
 }
 
 /* Returns the current thread's priority.
