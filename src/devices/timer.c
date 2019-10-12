@@ -17,9 +17,9 @@
 #error TIMER_FREQ <= 1000 recommended
 #endif
 
-/*list of all sleeping threads.*/
+/*list of all sleeping threads. */
 static struct list sleep_list;
-// static struct semaphore sema;
+static struct semaphore sema;
 
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
@@ -43,7 +43,7 @@ void timer_init(void)
 
   /*initial the sleep_list*/
   list_init(&sleep_list);
-  // list_init(&sema);
+  sema_init(&sema, 1);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -108,16 +108,16 @@ void timer_sleep(int64_t ticks)
 {
 
   ASSERT(intr_get_level() == INTR_ON);
-  enum intr_level old_level = intr_disable();
+  /*try use semaphore instead of intr_disable set_level*/
+  // enum intr_level old_level = intr_disable();
+  sema_down(&sema);
 
-  if(ticks <= 0)
+  if (ticks <= 0)
     return;
 
   int64_t start = timer_ticks();
   struct thread *currentThread = thread_current();
   currentThread->wake_time = ticks + start;
-  // printf("current ticks: %d  \n", start);
-  // printf("thread id: %d   wake up time: %d  \n", currentThread->tid, currentThread->wake_time);
 
   /*add an elem of thread to sleep_list*/
   struct list_elem *new_elem = &currentThread->elem;
@@ -142,14 +142,11 @@ void timer_sleep(int64_t ticks)
     // printf("list elem thread id: %d wake time: %d\n", t_elem->tid, t_elem->wake_time);
   }
 
-  // printf("GOT HERE RIGHT?\n");
   thread_block();
-  // printf("I don't understand why this line of code cannot be reached\n");
 
-  intr_set_level(old_level);
-
-  // while (timer_elapsed (start) < ticks)
-  //   thread_yield ();
+  /*try use semaphore instead of intr_disable set_level*/
+  // intr_set_level(old_level);
+  sema_up(&sema);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
