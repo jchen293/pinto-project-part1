@@ -240,10 +240,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
         struct list_elem *pop_elem = list_pop_front(&sleep_list);
         printf("unblocked threads: %d \n", t_elem->tid);
         thread_unblock(t_elem);
-
       }
-
-
     }
   }
 }
