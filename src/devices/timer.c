@@ -110,13 +110,14 @@ void timer_sleep(int64_t ticks)
   ASSERT(intr_get_level() == INTR_ON);
   enum intr_level old_level = intr_disable();
 
-  ASSERT(ticks > 0);
+  if(ticks <= 0)
+    return;
 
   int64_t start = timer_ticks();
   struct thread *currentThread = thread_current();
   currentThread->wake_time = ticks + start;
   // printf("current ticks: %d  \n", start);
-  printf("thread id: %d   wake up time: %d  \n", currentThread->tid, currentThread->wake_time);
+  // printf("thread id: %d   wake up time: %d  \n", currentThread->tid, currentThread->wake_time);
 
   /*add an elem of thread to sleep_list*/
   struct list_elem *new_elem = &currentThread->elem;
@@ -138,7 +139,7 @@ void timer_sleep(int64_t ticks)
        e = list_next(e))
   {
     struct thread *t_elem = list_entry(e, struct thread, elem);
-    printf("list elem thread id: %d wake time: %d\n", t_elem->tid, t_elem->wake_time);
+    // printf("list elem thread id: %d wake time: %d\n", t_elem->tid, t_elem->wake_time);
   }
 
   // printf("GOT HERE RIGHT?\n");
@@ -231,14 +232,14 @@ timer_interrupt(struct intr_frame *args UNUSED)
 
       /*while loop to wake up threads at the same wake time*/
       int64_t wake_time = list_entry(list_front(&sleep_list), struct thread, elem)->wake_time;
-      printf("while loop wake time: %d \n", wake_time);
+      // printf("while loop wake time: %d \n", wake_time);
       while (!list_empty(&sleep_list) && list_entry(list_front(&sleep_list), struct thread, elem)->wake_time == wake_time)
       {
         /*check the wake time of threads in the front*/
-        printf("wake time of list_begin: %d \n", list_entry(list_front(&sleep_list), struct thread, elem)->wake_time);
+        // printf("wake time of list_begin: %d \n", list_entry(list_front(&sleep_list), struct thread, elem)->wake_time);
         struct thread *t_elem = list_entry(list_front(&sleep_list), struct thread, elem);
         struct list_elem *pop_elem = list_pop_front(&sleep_list);
-        printf("unblocked threads: %d \n", t_elem->tid);
+        // printf("unblocked threads: %d \n", t_elem->tid);
         thread_unblock(t_elem);
 
       }

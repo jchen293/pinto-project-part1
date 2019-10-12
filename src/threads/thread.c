@@ -233,11 +233,11 @@ bool *push_by_priority(struct list_elem *elem,
                        struct list_elem *e, void *aux)
 {
 
-  /*first get the thread of e*/
+  /*first get the thread of e*/ 
   struct thread *t_elem = list_entry(elem, struct thread, elem);
   struct thread *t_e = list_entry(e, struct thread, elem);
 
-  printf("IN PUSH_BY_PRIORITY, threads priority: %d    , %d \n", t_elem->priority, t_e->priority);
+  // printf("IN PUSH_BY_PRIORITY, threads priority: %d    , %d \n", t_elem->priority, t_e->priority);
   // *********elem->sleep_thread->priority causes error:  Unexpected interrupt 0x0e (#PF Page-Fault Exception) ***********
   return t_elem->priority > t_e->priority;
 }
