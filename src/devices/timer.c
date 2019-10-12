@@ -109,8 +109,8 @@ void timer_sleep(int64_t ticks)
 
   ASSERT(intr_get_level() == INTR_ON);
   /*try use semaphore instead of intr_disable set_level*/
-  // enum intr_level old_level = intr_disable();
-  sema_down(&sema);
+  enum intr_level old_level = intr_disable();
+  // sema_down(&sema);
 
   if (ticks <= 0)
     return;
@@ -145,8 +145,8 @@ void timer_sleep(int64_t ticks)
   thread_block();
 
   /*try use semaphore instead of intr_disable set_level*/
-  // intr_set_level(old_level);
-  sema_up(&sema);
+  intr_set_level(old_level);
+  // sema_up(&sema);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
