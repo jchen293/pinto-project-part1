@@ -233,7 +233,7 @@ bool *push_by_priority(struct list_elem *elem,
                        struct list_elem *e, void *aux)
 {
 
-  /*first get the thread of e*/ 
+  /*first get the thread of e*/
   struct thread *t_elem = list_entry(elem, struct thread, elem);
   struct thread *t_e = list_entry(e, struct thread, elem);
 
