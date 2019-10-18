@@ -7,6 +7,7 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "threads/thread.c"
 #include "threads/floating-point.h"
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -212,11 +213,11 @@ void timer_print_stats(void)
   printf("Timer: %" PRId64 " ticks\n", timer_ticks());
 }
 
-// /*increment recent_cpu every tick*/
-// void increase_recent_cpu()
-// {
-//   thread_current()->recent_cpu = add_x_n(thread_current()->recent_cpu, 1);
-// }
+/*update recent_cpu every 100 tick(1 second)*/
+void update_recent_cpu(struct thread *t, void *aux)
+{
+  t->recent_cpu = add_x_n(t->recent_cpu, 1);
+}
 /* Timer interrupt handler. */
 static void
 timer_interrupt(struct intr_frame *args UNUSED)
@@ -238,17 +239,17 @@ timer_interrupt(struct intr_frame *args UNUSED)
       }
       if (ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
       {
-        floating_point load_avg = thread_get_load_avg();
-        struct list *ready_l = get_ready_list();
-        int thread_num = list_size(ready_l) + 1;
-        floating_point new_load_avg = add_x_y(mult_x_y((div_x_y(Convert_to_fixed_point(59), Convert_to_fixed_point(60))), load_avg), (mult_x_y((div_x_y(Convert_to_fixed_point(1), Convert_to_fixed_point(60))), thread_num)));
-
+        // floating_point load_avg = thread_get_load_avg();
+        // size_t all_size = get_ready_list_size();
+        // floating_point new_load_avg = add_x_y(mult_x_y((div_x_y(Convert_to_fixed_point(59), Convert_to_fixed_point(60))), load_avg), (mult_x_y((div_x_y(Convert_to_fixed_point(1), Convert_to_fixed_point(60))), all_size)));
+        calculate_load_avg();
         struct list_elem *e;
-        for (e = list_begin(ready_l); e != list_end(ready_l);
-             e = list_next(e))
+
+        for (e = list_begin(&all_list); e != list_end(&all_list);
+             e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
         {
-          struct thread *t = list_entry(e, struct thread, elem);
-          t->recent_cpu = (t->recent_cpu); /*start here: recalculate recent_cpu*/
+          struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
+          t->recent_cpu = add_x_n(mult_x_y(div_x_y(mult_x_n(load_avg, 2), add_x_n(mult_x_n(load_avg, 2), 1)), t->recent_cpu), t->nice);
         }
       }
     }

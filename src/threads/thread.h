@@ -149,6 +149,6 @@ void thread_set_nice(int);
 int thread_get_recent_cpu(void);
 int thread_get_load_avg(void);
 
-static struct list *get_ready_list();
+size_t get_ready_list_size(void);
 
 #endif /* threads/thread.h */

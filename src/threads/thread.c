@@ -614,11 +614,17 @@ allocate_tid(void)
   return tid;
 }
 
-static struct list *get_ready_list()
+size_t get_ready_list_size(void)
 {
-  return &ready_list;
+  return list_size(&all_list);
 }
 
+void calculate_load_avg(void)
+{
+  // load_avg = thread_get_load_avg();
+  size_t all_size = get_ready_list_size();
+  load_avg = add_x_y(mult_x_y((div_x_y(Convert_to_fixed_point(59), Convert_to_fixed_point(60))), load_avg), (mult_x_y((div_x_y(Convert_to_fixed_point(1), Convert_to_fixed_point(60))), all_size)));
+}
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof(struct thread, stack);
