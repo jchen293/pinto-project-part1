@@ -402,7 +402,7 @@ int thread_get_load_avg(void)
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
-float thread_get_recent_cpu(void)
+floating_point thread_get_recent_cpu(void)
 {
   /* Not yet implemented. */
   return 0;
