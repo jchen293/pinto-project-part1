@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/floating-point.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -58,6 +59,7 @@ static unsigned thread_ticks; /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
+static floating_point load_avg = 0;
 
 static void kernel_thread(thread_func *, void *aux);
 
@@ -396,11 +398,11 @@ int thread_get_nice(void)
 int thread_get_load_avg(void)
 {
   /* Not yet implemented. */
-  return 0;
+  return load_avg;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
-int thread_get_recent_cpu(void)
+float thread_get_recent_cpu(void)
 {
   /* Not yet implemented. */
   return 0;
@@ -610,6 +612,11 @@ allocate_tid(void)
   lock_release(&tid_lock);
 
   return tid;
+}
+
+static struct list *get_ready_list()
+{
+  return &ready_list;
 }
 
 /* Offset of `stack' member within `struct thread'.

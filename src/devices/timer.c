@@ -7,7 +7,7 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
-
+#include "threads/floating-point.h"
 /* See [8254] for hardware details of the 8254 timer chip. */
 
 #if TIMER_FREQ < 19
@@ -212,6 +212,11 @@ void timer_print_stats(void)
   printf("Timer: %" PRId64 " ticks\n", timer_ticks());
 }
 
+// /*increment recent_cpu every tick*/
+// void increase_recent_cpu()
+// {
+//   thread_current()->recent_cpu = add_x_n(thread_current()->recent_cpu, 1);
+// }
 /* Timer interrupt handler. */
 static void
 timer_interrupt(struct intr_frame *args UNUSED)
@@ -219,6 +224,35 @@ timer_interrupt(struct intr_frame *args UNUSED)
   ticks++;
   thread_tick();
 
+  /*mlfqs*/
+  if (thread_mlfqs)
+  {
+    if (thread_current()->tid != 2)
+    {
+      thread_current()->recent_cpu = add_x_n(thread_current()->recent_cpu, 1);
+
+      if (ticks % 4 == 0) /*priority = PRI_MAX - (recent_cpu / 4) - (nice * 2).*/
+      {
+        floating_point cpu = div_x_n(thread_current()->recent_cpu, 4);
+        thread_current()->priority = PRI_MAX - Convert_to_integer(cpu) - (thread_current()->nice * 2);
+      }
+      if (ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
+      {
+        floating_point load_avg = thread_get_load_avg();
+        struct list *ready_l = get_ready_list();
+        int thread_num = list_size(ready_l) + 1;
+        floating_point new_load_avg = add_x_y(mult_x_y((div_x_y(Convert_to_fixed_point(59), Convert_to_fixed_point(60))), load_avg), (mult_x_y((div_x_y(Convert_to_fixed_point(1), Convert_to_fixed_point(60))), thread_num)));
+
+        struct list_elem *e;
+        for (e = list_begin(ready_l); e != list_end(ready_l);
+             e = list_next(e))
+        {
+          struct thread *t = list_entry(e, struct thread, elem);
+          t->recent_cpu = (t->recent_cpu); /*start here: recalculate recent_cpu*/
+        }
+      }
+    }
+  }
   /*now we check block in wait list*/
   /*check unblock threads*/
   int64_t now = ticks;

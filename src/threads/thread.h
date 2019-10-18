@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/floating-point.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -96,6 +97,10 @@ struct thread
   int64_t wake_time; /* the time when it should be woke up*/
   int orig_priority; /*store the orginal priority for recorvering from donation*/
 
+  /*mlfqs*/
+  int nice;
+  floating_point recent_cpu;
+
 #ifdef USERPROG
   /* Owned by userprog/process.c. */
   uint32_t *pagedir; /* Page directory. */
@@ -143,5 +148,7 @@ int thread_get_nice(void);
 void thread_set_nice(int);
 int thread_get_recent_cpu(void);
 int thread_get_load_avg(void);
+
+static struct list *get_ready_list();
 
 #endif /* threads/thread.h */

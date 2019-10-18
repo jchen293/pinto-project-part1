@@ -49,20 +49,6 @@ void sema_init(struct semaphore *sema, unsigned value)
   list_init(&sema->waiters);
 }
 
-// /*push by priority; elem is the one been inserted*/
-// bool *push_by_priority(struct list_elem *elem,
-//                        struct list_elem *e, void *aux)
-// {
-//
-//   /*first get the thread of e*/
-//   struct thread *t_elem = list_entry(elem, struct thread, elem);
-//   struct thread *t_e = list_entry(e, struct thread, elem);
-//
-//   // printf("IN PUSH_BY_PRIORITY, threads priority: %d    , %d \n", t_elem->priority, t_e->priority);
-//   // *********elem->sleep_thread->priority causes error:  Unexpected interrupt 0x0e (#PF Page-Fault Exception) ***********
-//   return t_elem->priority > t_e->priority;
-// }
-
 /* Down or "P" operation on a semaphore.  Waits for SEMA's value
    to become positive and then atomically decrements it.
 
@@ -73,22 +59,20 @@ void sema_init(struct semaphore *sema, unsigned value)
 void sema_down(struct semaphore *sema)
 {
   enum intr_level old_level;
-  // printf("sema_down start\n" );
 
   ASSERT(sema != NULL);
   ASSERT(!intr_context());
 
   old_level = intr_disable();
+
   while (sema->value == 0)
   {
     /*insert order by priority*/
     list_insert_ordered(&sema->waiters, &thread_current()->elem, push_by_priority, NULL);
     // list_push_back(&sema->waiters, &thread_current()->elem);
-
     thread_block();
   }
   sema->value--;
-  // printf("sema_down finish\n" );
 
   intr_set_level(old_level);
 }
@@ -125,19 +109,15 @@ bool sema_try_down(struct semaphore *sema)
 void sema_up(struct semaphore *sema)
 {
   enum intr_level old_level;
-  // printf("sema_up start\n" );
 
   ASSERT(sema != NULL);
 
   old_level = intr_disable();
-  if (!list_empty(&sema->waiters)){
+  if (!list_empty(&sema->waiters))
     // list_sort(&sema->waiters, push_by_priority, NULL);
     thread_unblock(list_entry(list_pop_front(&sema->waiters),
                               struct thread, elem));
-  }
   sema->value++;
-  thread_yield();
-  // printf("sema_up finish\n" );
   intr_set_level(old_level);
 }
 
@@ -266,7 +246,7 @@ struct semaphore_elem
 {
   struct list_elem elem;      /* List element. */
   struct semaphore semaphore; /* This semaphore. */
-  int priority;
+  int priority;               /*Xingyu Liu: semaphore priority*/
 };
 
 /* Initializes condition variable COND.  A condition variable
@@ -278,6 +258,7 @@ void cond_init(struct condition *cond)
 
   list_init(&cond->waiters);
 }
+
 /*push by sema priority;*/
 bool *push_by_sema_priority(struct list_elem *elem,
                             struct list_elem *e, void *aux)
@@ -288,6 +269,7 @@ bool *push_by_sema_priority(struct list_elem *elem,
 
   return sema_elem->priority > sema_e->priority;
 }
+
 /* Atomically releases LOCK and waits for COND to be signaled by
    some other piece of code.  After COND is signaled, LOCK is
    reacquired before returning.  LOCK must be held before calling
@@ -318,10 +300,10 @@ void cond_wait(struct condition *cond, struct lock *lock)
   ASSERT(lock_held_by_current_thread(lock));
 
   sema_init(&waiter.semaphore, 0);
+  waiter.priority = thread_current()->priority;
   waiter.priority = lock->holder->priority;
-  list_insert_ordered(&cond->waiters, &waiter.elem, push_by_sema_priority, NULL);
-  // list_push_back(&cond->waiters, &waiter.elem);
-
+  // list_insert_ordered(&cond->waiters, &lock->holder->elem, push_by_priority, NULL);
+  list_push_back(&cond->waiters, &waiter.elem);
   lock_release(lock);
   sema_down(&waiter.semaphore);
   lock_acquire(lock);
@@ -341,11 +323,12 @@ void cond_signal(struct condition *cond, struct lock *lock UNUSED)
   ASSERT(!intr_context());
   ASSERT(lock_held_by_current_thread(lock));
 
-  if (!list_empty(&cond->waiters)){
+  if (!list_empty(&cond->waiters))
     sema_up(&list_entry(list_pop_front(&cond->waiters),
                         struct semaphore_elem, elem)
                  ->semaphore);
-  }
+  /*    thread_unblock(list_entry(list_pop_front(&sema->waiters),
+                              struct thread, elem));*/
 }
 
 /* Wakes up all threads, if any, waiting on COND (protected by
