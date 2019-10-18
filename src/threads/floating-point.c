@@ -3,12 +3,12 @@
 
 floating_point Convert_to_fixed_point(int n)
 {
-    return n * f;
+    return n << 14;
 }
 
 int Convert_to_integer(floating_point x)
 {
-    return x / f;
+    return x >> 14;
 }
 
 floating_point add_x_y(floating_point x, floating_point y)
@@ -18,7 +18,7 @@ floating_point add_x_y(floating_point x, floating_point y)
 
 floating_point add_x_n(floating_point x, int n)
 {
-    return x + n * f;
+    return x + (n << 14);
 }
 floating_point sub_x_y(floating_point x, floating_point y)
 {
@@ -27,7 +27,7 @@ floating_point sub_x_y(floating_point x, floating_point y)
 
 floating_point sub_x_n(floating_point x, int n)
 {
-    return x - n * f;
+    return x - (n << 14);
 }
 
 floating_point mult_x_n(floating_point x, int n)
@@ -37,7 +37,7 @@ floating_point mult_x_n(floating_point x, int n)
 
 floating_point mult_x_y(floating_point x, floating_point y)
 {
-    return ((int64_t)x) * y / f;
+    return (((int64_t)x) * y) >> 14;
 }
 
 floating_point div_x_n(floating_point x, int n)
@@ -47,5 +47,5 @@ floating_point div_x_n(floating_point x, int n)
 
 floating_point div_x_y(floating_point x, floating_point y)
 {
-    return ((int64_t)x) * f / y;
+    return (((int64_t)x) << 14) / y;
 }

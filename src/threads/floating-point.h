@@ -1,7 +1,7 @@
 
 #include <inttypes.h>
 
-#define f 2 ^ 14
+// #define f 2 ^ 14
 typedef int floating_point;
 // struct floating_point
 // {
