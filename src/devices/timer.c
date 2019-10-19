@@ -230,12 +230,12 @@ timer_interrupt(struct intr_frame *args UNUSED)
   {
     if (thread_current()->tid != 2)
     {
-      thread_current()->recent_cpu = add_x_n(thread_current()->recent_cpu, 1);
+      thread_current()->recent_cpu = FLOATING_POINT_ADD_N(thread_current()->recent_cpu, 1);
 
       if (ticks % 4 == 0) /*priority = PRI_MAX - (recent_cpu / 4) - (nice * 2).*/
       {
-        floating_point cpu = div_x_n(thread_current()->recent_cpu, 4);
-        thread_current()->priority = PRI_MAX - Convert_to_integer(cpu) - (thread_current()->nice * 2);
+        floating_point cpu = FLOATING_POINT_DIV_N(thread_current()->recent_cpu, 4);
+        thread_current()->priority = PRI_MAX - CONVERT_TO_INTEGER(cpu) - (thread_current()->nice * 2);
       }
       if (ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
       {
@@ -249,7 +249,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
              e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
         {
           struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
-          t->recent_cpu = add_x_n(mult_x_y(div_x_y(mult_x_n(load_avg, 2), add_x_n(mult_x_n(load_avg, 2), 1)), t->recent_cpu), t->nice);
+          t->recent_cpu = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
         }
       }
     }

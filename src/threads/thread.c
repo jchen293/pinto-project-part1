@@ -12,7 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/floating-point.h"
-#include "threads/floating-point.c"
+// #include "threads/floating-point.c"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -628,7 +628,7 @@ void calculate_load_avg(void)
 {
   // load_avg = thread_get_load_avg();
   size_t all_size = get_ready_list_size();
-  load_avg = add_x_y(mult_x_y((div_x_y(Convert_to_fixed_point(59), Convert_to_fixed_point(60))), load_avg), (mult_x_y((div_x_y(Convert_to_fixed_point(1), Convert_to_fixed_point(60))), all_size)));
+  load_avg = FLOATING_POINT_ADD(FLOATING_POINT_MULT((FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(59), CONVERT_TO_FIXED_POINT(60))), load_avg), (FLOATING_POINT_MULT((FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(1), CONVERT_TO_FIXED_POINT(60))), all_size)));
 }
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
