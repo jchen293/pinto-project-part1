@@ -12,6 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/floating-point.h"
+#include "threads/floating-point.c"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -402,14 +403,14 @@ int thread_get_nice(void)
 int thread_get_load_avg(void)
 {
   /* Not yet implemented. */
-  return Convert_to_integer(mult_x_n(load_avg, 100));
+  return CONVERT_TO_INTEGER(FLOATING_POINT_MULT_N(load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 floating_point thread_get_recent_cpu(void)
 {
   /* Not yet implemented. */
-  return round_down(mult_x_n(thread_current()->recent_cpu, 100));
+  return ROUND_DOWN(FLOATING_POINT_MULT_N(thread_current()->recent_cpu, 100));
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
