@@ -234,8 +234,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
 
       if (ticks % 4 == 0) /*priority = PRI_MAX - (recent_cpu / 4) - (nice * 2).*/
       {
-        floating_point cpu = FLOATING_POINT_DIV_N(thread_current()->recent_cpu, 4);
-        thread_current()->priority = PRI_MAX - CONVERT_TO_INTEGER(cpu) - (thread_current()->nice * 2);
+        thread_calculate_priority();
       }
       if (ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
       {
