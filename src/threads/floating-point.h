@@ -13,6 +13,8 @@ floating_point Convert_to_fixed_point(int n);
 
 int Convert_to_integer(floating_point x);
 
+floating_point round_down(floating_point);
+
 floating_point add_x_y(floating_point x, floating_point y);
 
 floating_point add_x_n(floating_point x, int n);

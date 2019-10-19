@@ -382,30 +382,34 @@ int thread_get_priority(void)
 }
 
 /* Sets the current thread's nice value to NICE. */
-void thread_set_nice(int nice UNUSED)
+void thread_set_nice(int nice)
 {
   /* Not yet implemented. */
+  if (thread_current()->tid != 2)
+  {
+    thread_current()->nice = nice;
+  }
 }
 
 /* Returns the current thread's nice value. */
 int thread_get_nice(void)
 {
   /* Not yet implemented. */
-  return 0;
+  return thread_current()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int thread_get_load_avg(void)
 {
   /* Not yet implemented. */
-  return load_avg;
+  return Convert_to_integer(mult_x_n(load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 floating_point thread_get_recent_cpu(void)
 {
   /* Not yet implemented. */
-  return 0;
+  return round_down(mult_x_n(thread_current()->recent_cpu, 100));
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.

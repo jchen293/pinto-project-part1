@@ -11,6 +11,17 @@ int Convert_to_integer(floating_point x)
     return x >> 14;
 }
 
+// (x + f / 2) / f if x >= 0,
+// (x - f / 2) / f if x <= 0.
+int round_down(floating_point x)
+{
+    if (x >= 0)
+    {
+        return (x + 8192) >> 14;
+    }
+    return (x - 8192) >> 14;
+}
+
 floating_point add_x_y(floating_point x, floating_point y)
 {
     return x + y;
