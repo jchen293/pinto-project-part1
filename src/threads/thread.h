@@ -150,5 +150,9 @@ int thread_get_recent_cpu(void);
 int thread_get_load_avg(void);
 
 size_t get_ready_list_size(void);
+void calculate_load_avg(void);
+void calculate_recent_cpu(void);
+
+
 
 #endif /* threads/thread.h */

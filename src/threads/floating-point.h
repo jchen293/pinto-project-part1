@@ -1,4 +1,5 @@
-
+#ifndef FLOATING_POINT_H
+#define FLOATING_POINT_H
 #include <inttypes.h>
 
 // #define f 2 ^ 14
@@ -51,3 +52,4 @@ typedef int floating_point;
 // floating_point div_x_n(floating_point x, int n);
 
 // floating_point div_x_y(floating_point x, floating_point y);
+#endif

@@ -7,7 +7,7 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
-#include "threads/thread.c"
+// #include "threads/thread.c"
 #include "threads/floating-point.h"
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -216,7 +216,7 @@ void timer_print_stats(void)
 /*update recent_cpu every 100 tick(1 second)*/
 void update_recent_cpu(struct thread *t, void *aux)
 {
-  t->recent_cpu = add_x_n(t->recent_cpu, 1);
+  t->recent_cpu = FLOATING_POINT_ADD_N(t->recent_cpu, 1);
 }
 /* Timer interrupt handler. */
 static void
@@ -243,14 +243,16 @@ timer_interrupt(struct intr_frame *args UNUSED)
         // size_t all_size = get_ready_list_size();
         // floating_point new_load_avg = add_x_y(mult_x_y((div_x_y(Convert_to_fixed_point(59), Convert_to_fixed_point(60))), load_avg), (mult_x_y((div_x_y(Convert_to_fixed_point(1), Convert_to_fixed_point(60))), all_size)));
         calculate_load_avg();
-        struct list_elem *e;
+        calculate_recent_cpu();
 
-        for (e = list_begin(&all_list); e != list_end(&all_list);
-             e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
-        {
-          struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
-          t->recent_cpu = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
-        }
+        // struct list_elem *e;
+        //
+        // for (e = list_begin(&all_list); e != list_end(&all_list);
+        //      e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
+        // {
+        //   struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
+        //   t->recent_cpu = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
+        // }
       }
     }
   }

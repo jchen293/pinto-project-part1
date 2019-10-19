@@ -11,7 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
-#include "threads/floating-point.h"
+// #include "threads/floating-point.h"
 // #include "threads/floating-point.c"
 #ifdef USERPROG
 #include "userprog/process.h"
@@ -629,6 +629,18 @@ void calculate_load_avg(void)
   // load_avg = thread_get_load_avg();
   size_t all_size = get_ready_list_size();
   load_avg = FLOATING_POINT_ADD(FLOATING_POINT_MULT((FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(59), CONVERT_TO_FIXED_POINT(60))), load_avg), (FLOATING_POINT_MULT((FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(1), CONVERT_TO_FIXED_POINT(60))), all_size)));
+}
+
+void calculate_recent_cpu(void)
+{
+  struct list_elem *e;
+
+  for (e = list_begin(&all_list); e != list_end(&all_list);
+       e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
+  {
+    struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
+    t->recent_cpu = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
+  }
 }
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
