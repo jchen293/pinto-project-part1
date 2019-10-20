@@ -59,7 +59,7 @@ static unsigned thread_ticks; /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
-static floating_point load_avg = 0;
+static floating_point load_avg;
 
 static void kernel_thread(thread_func *, void *aux);
 
@@ -388,6 +388,13 @@ void thread_set_nice(int nice)
   if (thread_current()->tid != 2)
   {
     thread_current()->nice = nice;
+    /*then calculate priority using nice and recent_cpu*/
+    thread_current()->priority = PRI_MAX - CONVERT_TO_INTEGER(FLOATING_POINT_DIV_N(thread_current()->recent_cpu, 4)) - ((thread_current()->nice) * 2);
+
+    if (list_size(&ready_list) != 0 && thread_current()->priority < list_entry(list_front(&ready_list), struct thread, elem)->priority)
+    {
+      thread_yield();
+    }
   }
 }
 
@@ -395,6 +402,10 @@ void thread_set_nice(int nice)
 int thread_get_nice(void)
 {
   /* Not yet implemented. */
+  if (thread_current()->tid == 2)
+  {
+    return;
+  }
   return thread_current()->nice;
 }
 
@@ -402,6 +413,10 @@ int thread_get_nice(void)
 int thread_get_load_avg(void)
 {
   /* Not yet implemented. */
+  if (thread_current()->tid == 2)
+  {
+    return;
+  }
   return CONVERT_TO_INTEGER(FLOATING_POINT_MULT_N(load_avg, 100));
 }
 
@@ -409,6 +424,10 @@ int thread_get_load_avg(void)
 int thread_get_recent_cpu(void)
 {
   /* Not yet implemented. */
+  if (thread_current()->tid == 2)
+  {
+    return;
+  }
   return ROUND_DOWN(FLOATING_POINT_MULT_N(thread_current()->recent_cpu, 100));
 }
 
@@ -620,14 +639,14 @@ allocate_tid(void)
 
 size_t get_ready_list_size(void)
 {
-  return list_size(&all_list);
+  return list_size(&ready_list);
 }
 
 void calculate_load_avg(void)
 {
-  // load_avg = thread_get_load_avg();
-  size_t all_size = get_ready_list_size();
-  load_avg = FLOATING_POINT_ADD(FLOATING_POINT_MULT((FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(59), CONVERT_TO_FIXED_POINT(60))), load_avg), (FLOATING_POINT_MULT((FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(1), CONVERT_TO_FIXED_POINT(60))), all_size)));
+  size_t all_size = get_ready_list_size() + 1;
+
+  load_avg = FLOATING_POINT_ADD(FLOATING_POINT_DIV(FLOATING_POINT_MULT(CONVERT_TO_FIXED_POINT(59), load_avg), CONVERT_TO_FIXED_POINT(60)), FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(all_size), CONVERT_TO_FIXED_POINT(60)));
 }
 
 void thread_calculate_priority(void)
@@ -638,9 +657,11 @@ void thread_calculate_priority(void)
        e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
   {
     struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
-    floating_point cpu = FLOATING_POINT_DIV_N(t->recent_cpu, 4);
-    t->priority = PRI_MAX - CONVERT_TO_INTEGER(cpu) - ((t->nice) * 2);
-    // t->priority = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
+    if (t->tid != 2)
+    {
+      // floating_point cpu = FLOATING_POINT_DIV_N(t->recent_cpu, 4);
+      t->priority = PRI_MAX - CONVERT_TO_INTEGER(FLOATING_POINT_DIV_N(t->recent_cpu, 4)) - ((t->nice) * 2);
+    }
   }
 }
 
@@ -652,7 +673,11 @@ void calculate_recent_cpu(void)
        e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
   {
     struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
-    t->recent_cpu = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
+    if (t->tid != 2)
+    {
+      t->recent_cpu = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
+      t->priority = PRI_MAX - CONVERT_TO_INTEGER(FLOATING_POINT_DIV_N(t->recent_cpu, 4)) - ((t->nice) * 2);
+    }
   }
 }
 /* Offset of `stack' member within `struct thread'.

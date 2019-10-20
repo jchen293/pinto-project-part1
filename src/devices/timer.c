@@ -238,20 +238,9 @@ timer_interrupt(struct intr_frame *args UNUSED)
       }
       if (ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
       {
-        // floating_point load_avg = thread_get_load_avg();
-        // size_t all_size = get_ready_list_size();
-        // floating_point new_load_avg = add_x_y(mult_x_y((div_x_y(Convert_to_fixed_point(59), Convert_to_fixed_point(60))), load_avg), (mult_x_y((div_x_y(Convert_to_fixed_point(1), Convert_to_fixed_point(60))), all_size)));
+
         calculate_load_avg();
         calculate_recent_cpu();
-
-        // struct list_elem *e;
-        //
-        // for (e = list_begin(&all_list); e != list_end(&all_list);
-        //      e = list_next(e)) /*recent_cpu =	(2*load_avg)/(2*load_avg +	1)	*	recent_cpu +	nice*/
-        // {
-        //   struct thread *t = list_entry(e, struct thread, allelem); //using list_entry we can get the thread who holds a elem
-        //   t->recent_cpu = FLOATING_POINT_ADD_N(FLOATING_POINT_MULT(FLOATING_POINT_DIV(FLOATING_POINT_MULT_N(load_avg, 2), FLOATING_POINT_ADD_N(FLOATING_POINT_MULT_N(load_avg, 2), 1)), t->recent_cpu), t->nice);
-        // }
       }
     }
   }
