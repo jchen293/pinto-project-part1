@@ -112,7 +112,9 @@ void timer_sleep(int64_t ticks)
   /*try use semaphore instead of intr_disable set_level*/
   enum intr_level old_level = intr_disable();
   // sema_down(&sema);
-
+  // printf("blocked thread:%d \n",thread_current()->tid );
+// get_ready_list_size
+// printf("get_ready_list_size:%d\n ",get_ready_list_size());
   if (ticks <= 0)
     return;
 
@@ -142,7 +144,6 @@ void timer_sleep(int64_t ticks)
     struct thread *t_elem = list_entry(e, struct thread, elem);
     // printf("list elem thread id: %d wake time: %d\n", t_elem->tid, t_elem->wake_time);
   }
-
   thread_block();
 
   /*try use semaphore instead of intr_disable set_level*/
@@ -225,24 +226,37 @@ timer_interrupt(struct intr_frame *args UNUSED)
   ticks++;
   thread_tick();
 
+  // if (ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
+  // {
+  //   calculate_load_avg();
+  //   calculate_recent_cpu();
+  // }
   /*mlfqs*/
   if (thread_mlfqs)
   {
     if (thread_current()->tid != 2)
     {
       thread_current()->recent_cpu = FLOATING_POINT_ADD_N(thread_current()->recent_cpu, 1);
+      // printf("in timer_interrupt, recent_cpu: %d\n",thread_get_recent_cpu());
 
-      if (ticks % 4 == 0) /*priority = PRI_MAX - (recent_cpu / 4) - (nice * 2).*/
-      {
-        thread_calculate_priority();
-      }
-      if (ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
-      {
 
-        calculate_load_avg();
-        calculate_recent_cpu();
-      }
     }
+    if (ticks % 4 == 0) /*priority = PRI_MAX - (recent_cpu / 4) - (nice * 2).*/
+    {
+      thread_calculate_priority();
+    }
+    if ( ticks % TIMER_FREQ == 0) /*load_avg =	(59/60)*load_avg +	(1/60)*ready_threads*/
+    {
+      // printf("lallalallal\n");
+      calculate_load_avg();
+      calculate_recent_cpu();
+      // printf("this is at time %d second\n",ticks/TIMER_FREQ);
+      // printf("in timer_interrupt,and in timer_qreq, recent_cpu: %d\n",thread_get_recent_cpu());
+
+    }
+
+
+
   }
   /*now we check block in wait list*/
   /*check unblock threads*/
@@ -262,6 +276,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
         struct thread *t_elem = list_entry(list_front(&sleep_list), struct thread, elem);
         struct list_elem *pop_elem = list_pop_front(&sleep_list);
         // printf("unblocked threads: %d \n", t_elem->tid);
+        // printf("thread_mlfqs: %d \n",thread_mlfqs);
         thread_unblock(t_elem);
       }
     }

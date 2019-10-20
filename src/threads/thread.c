@@ -523,6 +523,8 @@ init_thread(struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
 
+
+
   old_level = intr_disable();
   list_push_back(&all_list, &t->allelem);
   intr_set_level(old_level);
@@ -644,8 +646,12 @@ size_t get_ready_list_size(void)
 
 void calculate_load_avg(void)
 {
-  size_t all_size = get_ready_list_size() + 1;
+  size_t all_size = get_ready_list_size();
 
+    if (thread_current()->tid != 2)
+    {
+      all_size+=1;
+    }
   load_avg = FLOATING_POINT_ADD(FLOATING_POINT_DIV(FLOATING_POINT_MULT(CONVERT_TO_FIXED_POINT(59), load_avg), CONVERT_TO_FIXED_POINT(60)), FLOATING_POINT_DIV(CONVERT_TO_FIXED_POINT(all_size), CONVERT_TO_FIXED_POINT(60)));
 }
 
